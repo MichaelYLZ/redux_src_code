@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>React with JSX Samples</title>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<script src="https://unpkg.com/prop-types/prop-types.js"></script>
+
+ <script
+      type="text/babel"
+      data-plugins="transform-class-properties">
+
+
+const initialState = {
+  count: 0
+};
+
+class Counter extends React.Component {
+  increment = () => {
+    this.props.dispatch({ type: 'INCREMENT' });
+  }
+
+  decrement = () => {
+    this.props.dispatch({ type: 'DECREMENT' });
+  }
+
+  render() {
+      
+    return (
+      <div>
+        <h2>Counter</h2>
+        <div>
+          <button onClick={this.decrement}>-</button>
+          <span>{this.props.count}</span>
+          <button onClick={this.increment}>+</button>
+        </div>
+      </div>
+    )
+  }
+}
+
+const store = createStore(reducer, initialState);
+const LocalContext = React.createContext();
+
+const LocalProvider = LocalContext.Provider;
+const LocalConsumer = LocalContext.Consumer;
+
+
+
+const App = () => (
+  <LocalProvider value={store}>
+    <NewCounter />
+  </LocalProvider>
+);
+
+const a = connect(mapStateToProps);
+
+const NewCounter = a(Counter);
+
+// func 01
+function mapStateToProps(state) {
+  return {
+    count: state.count
+  };
+}
+
+function connect(mapStateToProps) {
+  return function (WrappedComponent) {
+    return class extends React.Component {
+      render() {
+        return (
+         <div>
+          <LocalConsumer>
+         {
+            context => {
+             return (
+             <WrappedComponent
+            {...context}
+            {...mapStateToProps(context.getState())}
+          />
+             );
+         }
+         }
+          </LocalConsumer>
+         </div>
+        )
+      }
+      componentDidMount() {
+        this.unsubscribe = store.subscribe(this.handleChange.bind(this))
+      }
+      
+      componentWillUnmount() {
+        this.unsubscribe()
+      }
+    
+      handleChange() {
+        this.forceUpdate()
+      }
+    } 
+  } 
+}
+
+// func 02
+function reducer(state = initialState, action) {
+  switch(action.type) {
+    case 'INCREMENT':
+      return {
+        count: state.count + 1
+      };
+    case 'DECREMENT':
+      return {
+        count: state.count - 1
+      };
+    default:
+      return state;
+  }
+}
+
+// func 03
+function createStore(reducer, initialState) {
+  let state = initialState;
+  let listener = () => {};
+
+  const subscribe = (newListener) => {
+      listener = newListener;
+  };
+
+  const getState = () => (state);
+
+  const dispatch = (action) => {
+    state = reducer(state, action);
+    listener();
+  };
+
+  return {
+    subscribe,
+    getState,
+    dispatch,
+  };
+}
+
+
+ReactDOM.render(<App />, document.getElementById('root'));
+
+ 
+    
+    
+</script>
+
+</body>
+</html>
