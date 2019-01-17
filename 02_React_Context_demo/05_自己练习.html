@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>React with JSX Samples</title>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<script src="https://unpkg.com/prop-types/prop-types.js"></script>
+
+ <script
+      type="text/babel"
+      data-plugins="transform-class-properties">
+
+const GreetContext = React.createContext();
+
+const GreetProvider = GreetContext.Provider;
+const GreetComsumer = GreetContext.Consumer;
+
+
+class App extends React.Component {
+    state = {
+        name: 'Mike Li'
+    }
+
+    render() {
+        return (
+            <div>
+            <GreetProvider value={this.state}>
+               <Greet />
+            </GreetProvider>
+            </div>
+        )
+    }
+}
+
+function Greet(props) {
+    return (
+        <GreetComsumer>
+            {
+               context => {
+                    console.log(context.name);
+                    return <p>1234</p>;
+                }
+            }
+        </GreetComsumer>
+    )
+}
+
+
+
+    
+ReactDOM.render(
+    <App />,
+    document.getElementById('root')
+)
+</script>
+
+</body>
+</html>

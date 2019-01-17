@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>React with JSX Samples</title>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<script src="https://unpkg.com/prop-types/prop-types.js"></script>
+
+ <script
+      type="text/babel"
+      data-plugins="transform-class-properties">
+
+class App extends React.Component {
+  state = {
+    user: {
+      username: 'jioke',
+      firstName: 'Kingsley',
+      lastName: 'Silas'
+    }
+  }
+
+  render() {
+    return(
+      <div>
+        <User user={this.state.user} />
+      </div>
+    )
+  }
+}
+
+const User = (props) => (
+  <div>
+    <UserProfile {...props.user} />
+  </div>
+)
+
+const UserProfile = (props) => (
+  <div>
+    <h2>Profile Page of {props.username}</h2>
+    <UserDetails {...props} />
+  </div>
+)
+
+const UserDetails = (props) => (
+  <div>
+    <p>Username: {props.username}</p>
+    <p>First Name: {props.firstName}</p>
+    <p>Last Name: {props.lastName}</p>
+  </div>
+)
+
+ReactDOM.render(<App />, document.getElementById("root"));
+
+    
+    
+</script>
+
+</body>
+</html>

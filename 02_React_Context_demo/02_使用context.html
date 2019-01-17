@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Use React Context</title>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@16/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+<script src="https://unpkg.com/prop-types/prop-types.js"></script>
+
+ <script
+      type="text/babel"
+      data-plugins="transform-class-properties">
+
+
+const UserContext = React.createContext({
+  username: 'Mike Li',
+  firstName: '杨',
+  lastName: '李'
+})
+
+const UserProvider = UserContext.Provider
+const UserConsumer = UserContext.Consumer
+
+class App extends React.Component {
+  state = {
+    user: {
+      username: 'jioke',
+      firstName: 'Kingsley',
+      lastName: 'Silas'
+    }
+  }
+
+  render() {
+    return(
+      <div>
+        <User />
+      </div>
+    )
+  }
+}
+
+const User = () => (
+  <div>
+    <UserProfile />
+  </div>
+)
+
+const UserProfile = (props) => (
+  <UserConsumer>
+    {context => {
+      return(
+        <div>
+          <h2>Profile Page of {context.username}</h2>
+          <UserDetails />
+        </div>
+      )
+    }}
+  </UserConsumer>
+)
+
+const UserDetails = () => (
+  <div>
+    <UserConsumer>
+      {context => {
+        return (
+          <div>
+            <p>Userame: {context.username}</p>
+            <p>First Name: {context.firstName}</p>
+            <p>Last Name: {context.lastName}</p>
+          </div>
+        )
+      }}
+    </UserConsumer>
+  </div>
+)
+
+ReactDOM.render(<App />, document.getElementById("root"));
+    
+    
+</script>
+
+</body>
+</html>
