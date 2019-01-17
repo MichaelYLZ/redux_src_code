@@ -1,3 +1,3 @@
 # 此仓库介绍
 
-文件01是一个最基本的**redux**应用，包含**createStore**，**combineReducers**简化后核心部分源码。
+此仓库包含**redux**,**react-redux**相关API背后的**核心源码**,和**React Context**相关的demo以及资料链接。
