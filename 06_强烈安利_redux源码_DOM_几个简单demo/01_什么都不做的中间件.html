@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>01_什么都不做的中间件</title>
+</head>
+<body>
+<div id="root"></div>
+
+
+
+ <script>
+/*
+applyMiddleware-createStore
+源码在最下面
+可以用 源码 01/ 02 查询
+*/
+
+// super simple counter reducer, where state is just a single number.
+var reducer = function(state = 0,action){
+    state = state || 0;
+    switch(action.type){
+        case 'INCREMENT': return state + (action.by || 1);
+        default: return state;
+    }
+}
+
+// render the current state of the store onto the screen
+var render = function(){
+    var newhtml = "<h2>Clicked "+store.getState()+" times.</h2>";
+    document.getElementById("root").innerHTML = newhtml;
+}
+
+// a super-simple noop middleware
+var noop = function(middlewareAPI){
+    return function(next){
+        return function(action){
+            return next(action);
+        }
+    }
+}
+
+// create a store from the reducer and the noop middleware
+var middlewares = applyMiddleware(noop);
+var store = createStore(reducer,middlewares);
+
+// make render run on every change to store, and run an initial render
+store.subscribe(render);
+render();
+
+// increase counter anytime page is clicked
+document.addEventListener('click', function(e){
+    store.dispatch({ type: 'INCREMENT', by: 1 });
+});
+
+
+// 源码 01
+
+function applyMiddleware(...middlewares) {
+    
+    return function (createStore) {
+        
+        return function (reducer, preloadedState, enhancer) {
+            var store = createStore(reducer, preloadedState, enhancer);
+    console.log(store);
+            var dispatch = store.dispatch;
+    
+            var chain = [];
+
+    
+            var middlewareAPI = {
+      getState: store.getState,
+      dispatch: (action) => dispatch(action)
+      };
+            
+            
+    chain = middlewares.map(middleware => middleware(middlewareAPI));
+
+            
+    dispatch = compose(...chain)(store.dispatch)
+
+    return {
+      ...store,
+      dispatch
+    }
+  }
+    }
+}
+
+// 源码 02
+function compose(...fns) {
+    
+    return function(x) {
+        
+        return fns.reduceRight((v, f) => f(v), x);
+    }
+}
+    
+// 源码 03
+
+const ActionTypes = {
+  INIT: '@@redux/INIT'
+}
+
+function createStore(reducer, preloadedState, enhancer) {
+  if (typeof preloadedState === 'function' && typeof enhancer === 'undefined') {
+    enhancer = preloadedState
+    preloadedState = undefined
+  }
+
+    
+  if (typeof enhancer !== 'undefined') {
+    if (typeof enhancer !== 'function') {
+      throw new Error('Expected the enhancer to be a function.')
+    }
+
+    return enhancer(createStore)(reducer, preloadedState)
+  }
+
+  if (typeof reducer !== 'function') {
+    throw new Error('Expected the reducer to be a function.')
+  }
+
+  let currentReducer = reducer
+  let currentState = preloadedState
+  let currentListeners = []
+  let nextListeners = currentListeners
+  let isDispatching = false
+
+  function ensureCanMutateNextListeners() {
+    if (nextListeners === currentListeners) {
+      nextListeners = currentListeners.slice()
+    }
+  }
+
+  
+  function getState() {
+    return currentState
+  }
+
+  
+  function subscribe(listener) {
+    if (typeof listener !== 'function') {
+      throw new Error('Expected listener to be a function.')
+    }
+
+    let isSubscribed = true
+
+    ensureCanMutateNextListeners()
+    nextListeners.push(listener)
+
+    return function unsubscribe() {
+      if (!isSubscribed) {
+        return
+      }
+
+      isSubscribed = false
+
+      ensureCanMutateNextListeners()
+      const index = nextListeners.indexOf(listener)
+      nextListeners.splice(index, 1)
+    }
+  }
+
+  
+  function dispatch(action) {
+   
+
+    if (typeof action.type === 'undefined') {
+      throw new Error(
+        'Actions may not have an undefined "type" property. ' +
+        'Have you misspelled a constant?'
+      )
+    }
+
+    if (isDispatching) {
+      throw new Error('Reducers may not dispatch actions.')
+    }
+
+    try {
+        
+      isDispatching = true
+      currentState = currentReducer(currentState, action)
+    } finally {
+      isDispatching = false
+    }
+
+    const listeners = currentListeners = nextListeners
+    for (let i = 0; i < listeners.length; i++) {
+      const listener = listeners[i]
+      listener()
+    }
+
+    return action
+  }
+
+  
+  dispatch({ type: '@@redux/INIT' })
+
+  return {
+    dispatch,
+    subscribe,
+    getState
+  }
+}
+
+
+</script>
+
+</body>
+</html>
